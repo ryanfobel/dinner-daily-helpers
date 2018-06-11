@@ -158,10 +158,12 @@ def ingredients_table(menu, decode_processing=True):
         df_ingredients.ingredient.str.extract(r'^(?P<quantity>[\d\/]+'
                                               r'(\s+[\d\/]+)?)\s+'
                                               r'(?P<unit>\S+)\s+'
-                                              r'(?P<description>\S+.*)$',
+                                              r'(?P<description>\S+.*?)'
+                                              r'(,\s+divided)?$',
                                               expand=False)
-    # Drop implied unnamed group from `quantity` named group.
-    df_decode_ingredients.drop(1, axis=1, inplace=True)
+    # Drop implied unnamed groups: 1) from `quantity` named group, and 2) from
+    # `", divided"`.
+    df_decode_ingredients.drop([1, 4], axis=1, inplace=True)
 
     # Set unit to `"each"` for ingredients where no units were specified.
     for i, ingredient_i in df_decode_ingredients.iterrows():
