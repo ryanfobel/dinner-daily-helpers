@@ -66,8 +66,8 @@ if __name__ == '__main__':
                     output.write(menu_markdown.getvalue().encode('utf8'))
         else:
             # Dump as HTML.
-            p = sp.Popen('pandoc -f gfm -t html - --template GitHub.html5',
-                         stdout=sp.PIPE, stdin=sp.PIPE)
+            p = sp.Popen('pandoc -f gfm -t html - --template GitHub.html5 '
+                         '--toc --toc-depth 2', stdout=sp.PIPE, stdin=sp.PIPE)
             p.stdin.write(menu_markdown.getvalue().encode('utf8'))
             stdout, stderr = p.communicate()
 
