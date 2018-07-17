@@ -6,6 +6,7 @@ import re
 import bs4
 import pandas as pd
 import pint
+import six
 
 from . import ureg
 
@@ -157,13 +158,18 @@ def ingredients_table(menu, decode_processing=True):
     df_decode_ingredients = \
         df_ingredients.ingredient.str.extract(r'^(?P<quantity>[\d\/]+'
                                               r'(\s+[\d\/]+)?)\s+'
-                                              r'(?P<unit>\S+)\s+'
+                                              r'((?P<unit>\S+)\s+)?'
                                               r'(?P<description>\S+.*?)'
                                               r'(,\s+divided)?$',
                                               expand=False)
     # Drop implied unnamed groups: 1) from `quantity` named group, and 2) from
     # `", divided"`.
-    df_decode_ingredients.drop([1, 4], axis=1, inplace=True)
+    df_decode_ingredients.drop([1, 2, 5], axis=1, inplace=True)
+
+    isna = df_decode_ingredients['quantity'].isna()
+    df_decode_ingredients.loc[isna, 'description'] =\
+        df_ingredients['ingredient']
+    df_decode_ingredients.loc[isna, 'quantity'] = 1
 
     # Set unit to `"each"` for ingredients where no units were specified.
     for i, ingredient_i in df_decode_ingredients.iterrows():
@@ -172,7 +178,8 @@ def ingredients_table(menu, decode_processing=True):
             ureg.parse_expression('%s %s' % (quantity_i, unit_i))
         except pint.UndefinedUnitError:
             # No recognized unit.  Assume unit is omitted, and assume "each".
-            desc_i = unit_i + ' ' + desc_i
+            if unit_i == unit_i and isinstance(unit_i, six.string_types):
+                desc_i = '%s %s' % (unit_i, desc_i)
             unit_i = 'each'
             ingredient_i.description = desc_i
             ingredient_i.unit = unit_i
