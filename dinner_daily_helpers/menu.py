@@ -76,7 +76,9 @@ def extract_meal(meal_div):
 
     # Side dishes
     side_dishes_i = [extract_recipe(dish_div_ij) for dish_div_ij in meal_div
-                     .select('div.dishes > div.side-dishes > div.details')]
+                     .select('div.dishes > div.side-dishes > div.details')
+                     if dish_div_ij.select_one('h5.side-heading > span.label')
+                     .contents[0].lower() != 'add a side']
 
     # Meal nutrition
     nutrition_i = [li.contents[0]
