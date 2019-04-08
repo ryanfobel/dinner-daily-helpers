@@ -24,14 +24,17 @@
 |{{ i }}|
 {%- endfor %}
 
-### Ingredients
+### Main dish
+
+#### Ingredients
 
 |      |
 |------|
 {% for ingredient in meal['main_dish']['ingredients'] -%}
 | {{ ingredient }}    |
 {% endfor %}
-### Instructions
+
+#### Instructions
 
 {% for instruction in meal['main_dish']['instructions'] -%}
  {{ loop.index }}. {{ instruction }}
@@ -55,6 +58,11 @@
 {% endfor %}
 
 {%- endfor %}
+
+### Meal ingredients
+
+{{ df_ingredients.fillna('-').set_index('meal').loc[loop.index].set_index(['processing', 'ingredient']).sort_index()[['quantity', 'unit', 'dish']].dropna().to_html() }}
+
 ------------------------------------------------------------------------
 {% endfor -%}
 
