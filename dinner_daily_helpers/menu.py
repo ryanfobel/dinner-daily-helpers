@@ -98,10 +98,20 @@ def extract_meal(meal_div):
 
 def extract_menu(weekly_html):
     soup = bs4.BeautifulSoup(weekly_html, 'html5lib')
-    result = dict(zip(['store', 'date', 'servings'],
-                      [s.strip() for s in soup.select_one('header > h2')
-                       .contents[0].split('-')]))
-    result['title'] = soup.select_one('header > h1').contents[0].strip()
+    try:
+        # Parse title, store, date, and servings from menus up until 2019-03-17
+        result = dict(zip(['store', 'date', 'servings'],
+                          [s.strip() for s in soup.select_one('header > h2')
+                           .contents[0].split('-')]))
+        result['title'] = soup.select_one('header > h1').contents[0].strip()
+    except AttributeError:
+        # Parse title, store, date, and servings from menus after 2019-03-17
+        result = {}
+        result['title'] = soup.select_one('header div#family-label > '
+                                          'h1').text.strip()
+        result['date'] = soup.select_one('header .theme-date').text.split('-')[-1].strip()
+        result['store'] = soup.select_one('header .theme-store-name').text
+        result['servings'] = soup.select_one('header div#family-label > h2').text
     menu_list = soup.find('ul', id='menu')
     meal_items = menu_list.find_all('li', id=re.compile('item-\d+'))
     result['meals'] = [extract_meal(meal_div_i) for meal_div_i in meal_items]

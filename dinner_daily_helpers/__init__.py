@@ -1,12 +1,11 @@
 import itertools as it
 import re
 
+from memoized import (fetch_shopping_list_html, fetch_weekly_menu_html,
+                      last_week, this_week, week)
 import bs4
 import pandas as pd
 import pint
-
-from memoized import (fetch_shopping_list_html, fetch_weekly_menu_html,
-                      last_week, this_week, week)
 
 
 ureg = pint.UnitRegistry(system='cgs')
