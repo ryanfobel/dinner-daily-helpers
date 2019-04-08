@@ -188,7 +188,7 @@ def ingredients_table(menu, decode_processing=True):
 
     # Extract any processing instructions.
     actions = ['chopped', 'peeled', 'minced', 'diced', 'sliced', 'drained',
-               'rinsed']
+               'rinsed', 'ends trimmed', 'shredded']
     df_processing = (df_decode_ingredients.description.str
                      .extract(r'(?P<root>.*?)'
                               r'(,\s+(?P<processing>[^,]*(%s)[^,]*))?$'
