@@ -1,5 +1,6 @@
 import calendar
 import datetime as dt
+import os
 import os.path
 
 from joblib import Memory
@@ -8,8 +9,9 @@ import requests
 
 
 __all__ = ['fetch_shopping_list_html', 'fetch_weekly_menu_html', 'week',
-           'this_week', 'last_week']
+           'this_week', 'last_week', 'DEFAULT_STORE']
 
+DEFAULT_STORE = os.environ.get('DINNER_DAILY_STORE', 'Any Store')
 
 memoize_memory = Memory(cachedir=os.path.expanduser('~/.dinner-daily-helpers'),
                         verbose=0)
@@ -41,7 +43,7 @@ def cookie_request(url):
 
 
 @memoize_memory.cache
-def fetch_shopping_list_html(week_):
+def fetch_shopping_list_html(week_, store=DEFAULT_STORE):
     # Select URL based on specified week.
     if week_ == this_week():
         relative_week = 'current'
@@ -50,8 +52,8 @@ def fetch_shopping_list_html(week_):
     else:
         raise ValueError('Week must be either: `%s` or `%s`' % (this_week(),
                                                                 last_week()))
-    url = ('https://db.thedinnerdaily.com/menus/print-shopping-list/Walmart/%s'
-           % relative_week)
+    url = ('https://db.thedinnerdaily.com/menus/print-shopping-list/%s/%s'
+           % (store, relative_week))
 
     response = cookie_request(url)
     if response.status_code != 200:
@@ -62,7 +64,7 @@ def fetch_shopping_list_html(week_):
 
 
 @memoize_memory.cache
-def fetch_weekly_menu_html(week_):
+def fetch_weekly_menu_html(week_, store=DEFAULT_STORE):
     # Select URL based on specified week.
     if week_ == this_week():
         relative_week = 'current'
@@ -71,8 +73,8 @@ def fetch_weekly_menu_html(week_):
     else:
         raise ValueError('Week must be either: `%s` or `%s`' % (this_week(),
                                                                 last_week()))
-    url = ('https://db.thedinnerdaily.com/menus/print/Walmart/%s' %
-           relative_week)
+    url = ('https://db.thedinnerdaily.com/menus/print/%s/%s' %
+           (store, relative_week))
     response = cookie_request(url)
     if response.status_code != 200:
         raise IOError('Error fetching weekly menu.  Make sure you have '
