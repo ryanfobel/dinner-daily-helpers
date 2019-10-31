@@ -1,6 +1,8 @@
 import argparse
 import logging
 import os
+import re
+
 import dateparser
 
 from .memoized import cookie_request, DEFAULT_STORE
@@ -8,6 +10,11 @@ from .menu import extract_menu
 
 
 def download(week_, output_dir, store=DEFAULT_STORE):
+    '''
+    .. versionchanged:: X.X.X
+        Parse start date from new ``<month> <start> to <end>`` format (e.g.,
+        ``Oct 28 to 03``).
+    '''
     if week_ not in ('current', 'previous'):
         raise ValueError('`week` must be either `current` or `previous`.')
 
@@ -17,6 +24,7 @@ def download(week_, output_dir, store=DEFAULT_STORE):
     menu_response = cookie_request(base_url + 'print/%s/%s' % (store, week_))
     # Scrape date from menu HTML to use in file name.
     menu = extract_menu(menu_response.text)
+    menu['date'] = re.sub(r' to .*', '', menu['date'])
     menu_date = dateparser.parse(menu['date'])
     # Download weekly shopping list using browser cookies.
     list_response = cookie_request(base_url + 'print-shopping-list/%s/%s' %
