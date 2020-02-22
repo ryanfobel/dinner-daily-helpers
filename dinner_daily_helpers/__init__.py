@@ -3,8 +3,6 @@ from __future__ import print_function, unicode_literals
 import itertools as it
 import re
 
-from memoized import (fetch_shopping_list_html, fetch_weekly_menu_html,
-                      last_week, this_week, week)
 import bs4
 import pandas as pd
 import pint
@@ -49,8 +47,8 @@ def get_section_ingredients(html):
     frames = []
     keys = []
 
-    cre_ingredient = re.compile(ur'^(?P<side_dish>\*)?(?P<name>.*)[ \xa0]'
-                                ur'\((?P<quantity>[^\)]+?)(,\xa0(?P<optional>optional))?\)$')
+    cre_ingredient = re.compile(r'^(?P<side_dish>\*)?(?P<name>.*)[ \xa0]'
+                                r'\((?P<quantity>[^\)]+?)(,\xa0(?P<optional>optional))?\)$')
 
     for name_i, list_i in list_sections.items():
         shopping_list_i = list_i.find('ul', class_='shopping-list')
