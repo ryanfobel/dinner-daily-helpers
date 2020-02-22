@@ -2,3 +2,10 @@ __pycache__
 *.pyc
 *.egg-info/
 /build/
+.dinner-daily-helpers
+.history
+.ipynb_checkpoints
+*-menu.md
+*-menu.json
+*.html
+*.pdf
