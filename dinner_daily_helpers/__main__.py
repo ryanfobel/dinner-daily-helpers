@@ -3,6 +3,7 @@ import argparse
 import io
 import json
 import os
+import pathlib
 import subprocess as sp
 import sys
 
@@ -48,7 +49,8 @@ if __name__ == '__main__':
                 output.close()
     else:
         menu_markdown = io.StringIO()
-        template_path = os.path.join(PARENT_DIR, 'weekly_menu.template.md')
+        templates_dir = pathlib.Path(os.path.join(PARENT_DIR, 'templates'))
+        template_path = templates_dir.joinpath('weekly_menu.template.md')
         with open(template_path, 'r') as input_:
             template = jinja2.Template(input_.read())
 
@@ -66,8 +68,10 @@ if __name__ == '__main__':
                     output.write(menu_markdown.getvalue())
         else:
             # Dump as HTML.
-            p = sp.Popen('pandoc -f gfm -t html - --template GitHub.html5 '
-                         '--toc --toc-depth 2', stdout=sp.PIPE, stdin=sp.PIPE)
+            p = sp.Popen('pandoc -f gfm -t html - --template %s '
+                         '--toc --toc-depth 2' %
+                         templates_dir.joinpath('GitHub.html5'),
+                         stdout=sp.PIPE, stdin=sp.PIPE)
             p.stdin.write(menu_markdown.getvalue().encode('utf8'))
             stdout, stderr = p.communicate()
 
