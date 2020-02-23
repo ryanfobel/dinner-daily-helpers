@@ -63,7 +63,7 @@ if __name__ == '__main__':
                 print(menu_markdown.getvalue(), end='')
             else:
                 with open(args.output_path, 'w') as output:
-                    output.write(menu_markdown.getvalue().encode('utf8'))
+                    output.write(menu_markdown.getvalue())
         else:
             # Dump as HTML.
             p = sp.Popen('pandoc -f gfm -t html - --template GitHub.html5 '
