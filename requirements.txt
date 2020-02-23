@@ -1,5 +1,6 @@
 beautifulsoup4
 dateparser
+html5lib
 jinja2
 pandas
 pint
