@@ -79,4 +79,4 @@ if __name__ == '__main__':
                 print(stdout.strip())
             else:
                 with open(args.output_path, 'w') as output:
-                    output.write(stdout)
+                    output.write(stdout.decode('utf8'))
