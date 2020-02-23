@@ -1,0 +1,7 @@
+beautifulsoup4
+dateparser
+jinja2
+pandas
+pint
+requests
+six
