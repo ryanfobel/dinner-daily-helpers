@@ -1,0 +1,33 @@
+version: 1.0.{build}
+skip_non_tags: true
+image: Visual Studio 2015
+init:
+- ps: >-
+    Write-Host $env:PYTHON_VERSION $env:MINICONDA
+    Write-Host $env:PATH
+environment:
+  DINNER_DAILY_USERNAME:
+    secure: yFMwVoU7FVuX9vmE9O90GDTSd06keku1gjAcgDcr2b8=
+  DINNER_DAILY_PASSWORD:
+    secure: Z1Qoc3a3M+B1D/nT1/ihz8wtnpth+OUpPtjYybtOW3A=
+  CONDA_EXTRA_CHANNELS: conda-forge
+  matrix:
+  - PYTHON_VERSION: 3.6
+    MINICONDA: C:\Miniconda36-x64
+    PYTHON_ARCH: 64
+    ARCH: Win64
+install:
+- ps: .appveyor/install.ps1
+build_script:
+- ps: .appveyor/build.ps1
+artifacts:
+- path: artifacts/*.*
+  name: ExtractedMenuShoppingList
+deploy:
+- provider: GitHub
+  auth_token:
+    secure: ftT/Wyiv8V+FM3QuJCRN0j4HG7lSdrhYLdtjHoisn1HYfmDNCpZ+uy/OUh+d3D7m
+  artifact: ExtractedMenuShoppingList
+  force_update: true
+  on:
+    APPVEYOR_REPO_TAG: true
