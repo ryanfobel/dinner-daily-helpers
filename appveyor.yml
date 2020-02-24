@@ -30,5 +30,3 @@ deploy:
     secure: ftT/Wyiv8V+FM3QuJCRN0j4HG7lSdrhYLdtjHoisn1HYfmDNCpZ+uy/OUh+d3D7m
   artifact: ExtractedMenuShoppingList
   force_update: true
-  on:
-    APPVEYOR_REPO_TAG: true
