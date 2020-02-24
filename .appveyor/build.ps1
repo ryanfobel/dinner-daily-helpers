@@ -14,7 +14,7 @@ Update-AppveyorBuild -Version $buildTag
 
 conda activate $env:APPVEYOR_PROJECT_NAME
 
-python -m dinner_daily_helpers.download previous .
+python -m dinner_daily_helpers.download current .
 foreach ($menu in $(dir ????-??-??-weekly-menu-Any?Store.html)) { 
     echo $menu;
     if (-not (Test-Path "$($menu.BaseName).json")) {
