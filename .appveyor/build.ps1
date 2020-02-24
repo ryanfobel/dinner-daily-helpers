@@ -31,7 +31,7 @@ foreach ($menu in $(dir ????-??-??-weekly-menu-Any?Store.html)) {
     }
 }
 
-$env:SUFFIX = $(dir ????-??*.md | Select-Object -first 1 | % { $_.Name.Substring(0, 7) })
+$env:SUFFIX = $(dir ????-??-??*.md | Select-Object -first 1 | % { $_.Name.Substring(0, 10) })
 $env:RELEASE_NAME = $prevTag + $env:SUFFIX
 
 md artifacts
