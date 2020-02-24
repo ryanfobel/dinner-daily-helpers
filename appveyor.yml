@@ -25,6 +25,7 @@ artifacts:
   name: ExtractedMenuShoppingList
 deploy:
 - provider: GitHub
+  tag: $(APPVEYOR_REPO_TAG)-$(SUFFIX)
   auth_token:
     secure: ftT/Wyiv8V+FM3QuJCRN0j4HG7lSdrhYLdtjHoisn1HYfmDNCpZ+uy/OUh+d3D7m
   artifact: ExtractedMenuShoppingList

@@ -31,6 +31,8 @@ foreach ($menu in $(dir ????-??-??-weekly-menu-Any?Store.html)) {
     }
 }
 
+$env:SUFFIX = $(dir ????-??*.md | Select-Object -first 1 | % { $_.Name.Substring(0, 7) })
+
 md artifacts
 mv *.json artifacts
 mv *.html artifacts
