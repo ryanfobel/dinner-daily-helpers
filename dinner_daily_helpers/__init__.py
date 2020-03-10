@@ -16,6 +16,7 @@ ureg.define('bunch = []')
 ureg.define('head = []')
 ureg.define('loaf = []')
 ureg.define('package = []')
+ureg.define('rib = []')
 
 
 def get_staple_ingredients(html):
