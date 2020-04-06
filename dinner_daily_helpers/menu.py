@@ -2,11 +2,14 @@ from __future__ import print_function, unicode_literals, division
 import io
 import itertools as it
 import re
+import os
+import json
 
 import bs4
 import pandas as pd
 import pint
 import six
+import requests
 
 from . import ureg
 
@@ -215,3 +218,101 @@ def ingredients_table(menu, decode_processing=True):
     df_decode_ingredients.rename(columns={'description': 'ingredient'},
                                  inplace=True)
     return df_decode_ingredients
+
+
+def convert_recipe_to_json_ld(recipe, category='Entree', yield_='2-3 people'):
+    baseurl = 'https://db.thedinnerdaily.com'
+
+    url = '%s/recipes/%s' % (baseurl, 
+        recipe['title'].lower().replace(' & ', '-').replace(', ', '-').replace(' ', '-'))
+    response = requests.get(url)
+    soup = bs4.BeautifulSoup(response.content, 'html5lib')
+    
+    result = {
+          "@context": "https://schema.org/",
+          "@type": "Recipe",
+          "name": recipe['title'],
+          "url": url,
+          "author": {
+            "@type": "Organization",
+            "name": "The Dinner Daily",
+            "recipeCategory": category,
+          },
+    }
+
+    img = soup.find('img', class_='recipe-image')
+    if img:
+        result['image'] = [baseurl + size.split(' ')[0] for size in img['srcset'].split(', ')]
+
+    duration = soup.find('span', class_='duration').text
+
+    # Convert to ISO_8601 format (https://en.wikipedia.org/wiki/ISO_8601)
+    result['totalTime'] = 'PT%sM' % re.search('(?P<min>\d+) MINS', duration).groupdict()['min']
+
+    result['recipeYield'] = yield_
+    result['recipeIngredient'] = recipe['ingredients']
+    result['recipeInstructions'] = [{"@type": "HowToStep",
+                                      #"name": "Enjoy",
+                                      "text": step,
+                                      #"url": "https://example.com/party-coffee-cake#step6",
+                                      #"image": "https://example.com/photos/party-coffee-cake/step6.jpg"
+                                     } for step in recipe['instructions']]
+    
+    nutrition = [li.contents[0] for li in soup.find('ul', class_='nutrition').select('li')]
+    nutrition = dict(item.split(' ', maxsplit=1)[::-1] for item in nutrition)
+    nutrition = {k.lower(): v for k, v in nutrition.items()}
+
+    rename_fields = { 'protein': 'proteinContent',
+                      'fiber': 'fiberContent',
+                      'carbs': 'carbohydrateContent',
+                      'saturated fat': 'saturatedFatContent',
+                      'sodium': 'sodiumContent',
+                      'cals': 'calories',
+                      'fat': 'fatContent',
+    }
+
+    for k, v in rename_fields.items():
+        nutrition[v] = nutrition.pop(k)
+        match = re.search('(?P<value>\d+)(?P<units>.*)', nutrition[v])
+        value, units = match.groups()
+        value = float(value)
+        if units == 'mg':
+            value /= 1e3
+            units = 'g'
+        if v == 'calories':
+            value /= 1e3
+            units = 'calories'
+        nutrition[v] = '%s %s' % (value, units)
+
+    result['nutrition'] = nutrition    
+    
+    result["discussionUrl"] = result['url']
+    return result
+
+
+def extract_recipes_from_menu(menu):
+    recipes = {}
+    for meal in menu['meals']:
+        json_ld = convert_recipe_to_json_ld(meal['main_dish'])
+        recipes[json_ld['name']] = json_ld
+
+        for side in meal['side_dishes']:
+            json_ld = convert_recipe_to_json_ld(side, 'Side')
+            recipes[json_ld['name']] = json_ld
+    return recipes
+
+
+def export_json_ld(recipe, output_directory):
+    os.makedirs(output_directory, exist_ok=True)
+    with open(os.path.join(output_directory, recipe['url'].split('/')[-1] + '.json'), 'w') as f:
+        json.dump(recipe, f, indent=4)
+    
+    # export images
+    if 'image' in recipe.keys():
+        image_dir = os.path.join(output_directory, 'images', recipe['url'].split('/')[-1])
+
+        for url in recipe['image']:
+            os.makedirs(image_dir, exist_ok=True)
+            filepath = os.path.join(image_dir, url.split('/')[-1])
+            r = requests.get(url, allow_redirects=True)
+            open(filepath, 'wb').write(r.content)        
