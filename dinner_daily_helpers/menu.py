@@ -224,7 +224,7 @@ def convert_recipe_to_json_ld(recipe, category='Entree', yield_='2-3 people'):
     baseurl = 'https://db.thedinnerdaily.com'
 
     url = '%s/recipes/%s' % (baseurl, 
-        recipe['title'].lower().replace(' & ', '-').replace(', ', '-').replace(' ', '-'))
+        re.sub('[-]+', '-', re.sub(r'[&|,| ]', '-', recipe['title'].lower())))
     response = requests.get(url)
     soup = bs4.BeautifulSoup(response.content, 'html5lib')
     
